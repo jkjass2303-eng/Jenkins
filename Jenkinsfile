@@ -24,14 +24,14 @@ pipeline {
                     if (params.BRANCH == 'main') {
                         sh '''
                         echo "===== MAIN BRANCH ====="
-                        cat Main/index.txt
+                        cat main/index.txt
                         '''
                     }
 
                     if (params.BRANCH == 'dev') {
                         sh '''
                         echo "===== DEV BRANCH ====="
-                        cat Dev/index.txt
+                        cat dev/index.txt
                         '''
                     }
                 }
