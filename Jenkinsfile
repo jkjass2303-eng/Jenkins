@@ -1,41 +1,41 @@
 pipeline {
-    agent any
+agent any
 
-    parameters {
-        choice(
-            name: 'BRANCH',
-            choices: ['main', 'dev'],
-            description: 'Select branch'
-        )
-    }
+stages {
 
-    stages {
+    stage('Display Branch Content') {
+        steps {
+            script {
 
-        stage('Checkout') {
-            steps {
-                git branch: params.BRANCH,
-                    url: 'https://github.com/jkjass2303-eng/Jenkins.git/'
-            }
-        }
+                def branch = env.GIT_BRANCH ?: ''
 
-        stage('Display Content') {
-            steps {
-                script {
-                    if (params.BRANCH == 'main') {
-                        sh '''
-                        echo "===== MAIN BRANCH ====="
-                        cat main/index.txt
-                        '''
-                    }
+                echo "Current Branch: ${branch}"
 
-                    if (params.BRANCH == 'dev') {
-                        sh '''
-                        echo "===== DEV BRANCH ====="
-                        cat dev/index.txt
-                        '''
-                    }
+                if (branch.contains('main')) {
+                    bat '''
+                    echo ===== MAIN BRANCH =====
+                    type main\\index.txt
+                    '''
+                }
+                else if (branch.contains('dev')) {
+                    bat '''
+                    echo ===== DEV BRANCH =====
+                    type dev\\index.txt
+                    '''
+                }
+                else if (branch.contains('test')) {
+                    bat '''
+                    echo ===== TEST BRANCH =====
+                    type test\\index.txt
+                    '''
+                }
+                else {
+                    echo "Branch not configured. Skipping..."
                 }
             }
         }
     }
+}
+
+
 }
