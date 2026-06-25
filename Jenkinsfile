@@ -1,41 +1,86 @@
 pipeline {
-agent any
+    agent any
 
-stages {
+    stages {
 
-    stage('Display Branch Content') {
-        steps {
-            script {
+        stage('Branch Information') {
+            steps {
+                script {
 
-                def branch = env.GIT_BRANCH ?: ''
+                    BRANCH = env.GIT_BRANCH
 
-                echo "Current Branch: ${branch}"
+                    if (BRANCH == null || BRANCH == '') {
+                        BRANCH = sh(
+                            script: "git rev-parse --abbrev-ref HEAD",
+                            returnStdout: true
+                        ).trim()
+                    }
 
-                if (branch.contains('main')) {
-                    bat '''
-                    echo ===== MAIN BRANCH =====
-                    type main\\index.txt
-                    '''
-                }
-                else if (branch.contains('dev')) {
-                    bat '''
-                    echo ===== DEV BRANCH =====
-                    type dev\\index.txt
-                    '''
-                }
-                else if (branch.contains('test')) {
-                    bat '''
-                    echo ===== TEST BRANCH =====
-                    type test\\index.txt
-                    '''
-                }
-                else {
-                    echo "Branch not configured. Skipping..."
+                    BRANCH = BRANCH.replace("origin/", "")
+
+                    echo "================================="
+                    echo "Current Branch: ${BRANCH}"
+                    echo "================================="
                 }
             }
         }
+
+        stage('Frontend Build') {
+            when {
+                expression { BRANCH == 'frontend' }
+            }
+
+            steps {
+                echo "Frontend branch detected"
+
+                sh '''
+                    echo "Running Frontend Build..."
+                    pwd
+                    ls -la
+                '''
+            }
+        }
+
+        stage('Backend Build') {
+            when {
+                expression { BRANCH == 'backend' }
+            }
+
+            steps {
+                echo "Backend branch detected"
+
+                sh '''
+                    echo "Running Backend Build..."
+                    pwd
+                    ls -la
+                '''
+            }
+        }
+
+        stage('Dev Build') {
+            when {
+                expression { BRANCH == 'dev' }
+            }
+
+            steps {
+                echo "Dev branch detected"
+
+                sh '''
+                    echo "Running Dev Build..."
+                    pwd
+                    ls -la
+                '''
+            }
+        }
     }
-}
 
+    post {
+        success {
+            echo "Build completed successfully."
+        }
 
+        failure {
+            echo "Build failed."
+        }
+    }
 }
